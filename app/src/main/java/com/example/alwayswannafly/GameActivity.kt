@@ -6,8 +6,10 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -22,6 +24,8 @@ class GameActivity : AppCompatActivity() {
     private lateinit var gameOverLayout: LinearLayout
     private lateinit var coin: ImageView
     private lateinit var wallTouchCounter: TextView
+    private lateinit var leftSpikesColumn: LinearLayout
+    private lateinit var rightSpikesColumn: LinearLayout
     private var velocityY = 0f
     private var velocityX = 5f
     private var isGameStarted = false
@@ -42,6 +46,8 @@ class GameActivity : AppCompatActivity() {
         gameOverLayout = findViewById(R.id.gameOverLayout)
         coin = findViewById(R.id.coin)
         wallTouchCounter = findViewById(R.id.wallTouchCounter)
+        leftSpikesColumn = findViewById(R.id.leftSpikesColumn)
+        rightSpikesColumn = findViewById(R.id.rightSpikesColumn)
         val mainMenuButton: Button = findViewById(R.id.mainMenuButton)
 
         mainMenuButton.setOnClickListener {
@@ -64,6 +70,19 @@ class GameActivity : AppCompatActivity() {
             }
             true
         }
+
+        // Используем ViewTreeObserver для вызова метода после установки размеров
+        val layoutListener = object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                leftSpikesColumn.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                rightSpikesColumn.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                generateSideSpikes(leftSpikesColumn, true)
+                generateSideSpikes(rightSpikesColumn, false)
+            }
+        }
+
+        leftSpikesColumn.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
+        rightSpikesColumn.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
     }
 
     private val updateRunnable = object : Runnable {
@@ -106,6 +125,10 @@ class GameActivity : AppCompatActivity() {
             gameCharacter.x = clampedX
             wallTouches++
             wallTouchCounter.text = wallTouches.toString()
+            handler.postDelayed({
+                generateSideSpikes(leftSpikesColumn, true)
+                generateSideSpikes(rightSpikesColumn, false)
+            }, 1000) // Задержка в 1.0 секунды перед перегенерацией шипов
         }
 
         // Check for coin collision
@@ -120,7 +143,9 @@ class GameActivity : AppCompatActivity() {
         gameCharacter.getHitRect(gameCharacterRect)
         val spikes = arrayOf(
             findViewById<LinearLayout>(R.id.bottomSpikesRow),
-            findViewById<LinearLayout>(R.id.topSpikesRow)
+            findViewById<LinearLayout>(R.id.topSpikesRow),
+            leftSpikesColumn,
+            rightSpikesColumn
         )
 
         for (spike in spikes) {
@@ -168,6 +193,36 @@ class GameActivity : AppCompatActivity() {
         coin.x = x.toFloat()
         coin.y = y.toFloat()
         coin.visibility = View.VISIBLE
+    }
+
+    private fun generateSideSpikes(column: LinearLayout, isLeft: Boolean) {
+        column.removeAllViews()
+        val parentHeight = column.height
+        val spikeSize = 100 // Размер шипа
+
+        // Проверка правильной установки высоты родителя
+        Log.d("GameActivity", "Parent height: $parentHeight")
+
+        if (parentHeight <= spikeSize) {
+            Log.e("GameActivity", "Parent height is too small to generate spikes")
+            return
+        }
+
+        for (i in 0 until 8) {
+            val spike = ImageView(this)
+            spike.setImageResource(R.drawable.spike)
+            val params = LinearLayout.LayoutParams(spikeSize, spikeSize)
+            params.topMargin = random.nextInt(parentHeight - spikeSize)
+            spike.layoutParams = params
+
+            // Повернем шипы в зависимости от стороны
+            spike.rotation = if (isLeft) 270f else 90f
+
+            // Проверка правильной установки параметров шипов
+            Log.d("GameActivity", "Spike $i: topMargin = ${params.topMargin}, rotation = ${spike.rotation}")
+
+            column.addView(spike)
+        }
     }
 
     private fun saveScore() {
