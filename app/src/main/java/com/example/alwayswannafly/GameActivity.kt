@@ -11,6 +11,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import kotlin.math.max
 import kotlin.math.min
@@ -20,11 +21,13 @@ class GameActivity : AppCompatActivity() {
     private lateinit var gameCharacter: ImageView
     private lateinit var gameOverLayout: LinearLayout
     private lateinit var coin: ImageView
+    private lateinit var wallTouchCounter: TextView
     private var velocityY = 0f
     private var velocityX = 5f
     private var isGameStarted = false
     private var isGameOver = false
     private var score = 0
+    private var wallTouches = 0
     private val gravity = 0.5f
     private val jumpStrengthY = -15f
     private val jumpStrengthX = 5f
@@ -38,6 +41,7 @@ class GameActivity : AppCompatActivity() {
         gameCharacter = findViewById(R.id.gameCharacter)
         gameOverLayout = findViewById(R.id.gameOverLayout)
         coin = findViewById(R.id.coin)
+        wallTouchCounter = findViewById(R.id.wallTouchCounter)
         val mainMenuButton: Button = findViewById(R.id.mainMenuButton)
 
         mainMenuButton.setOnClickListener {
@@ -100,6 +104,8 @@ class GameActivity : AppCompatActivity() {
             gameCharacter.scaleX = if (velocityX > 0) 1f else -1f
             clampedX = max(0f, min(gameCharacter.x + velocityX, parentWidth - gameCharacter.width.toFloat()))
             gameCharacter.x = clampedX
+            wallTouches++
+            wallTouchCounter.text = wallTouches.toString()
         }
 
         // Check for coin collision

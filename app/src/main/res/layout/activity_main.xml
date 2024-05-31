@@ -2,32 +2,37 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@drawable/pisapopa"
                 tools:context=".MainActivity">
 
-    <TextView
-            android:id="@+id/gameTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="AlwaysWannaFly"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="50dp"/>
+    <!-- Спрайт птички в центре белого круга -->
+    <ImageView
+            android:id="@+id/gameCharacter"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/character_falling"/>
 
+    <!-- Красивая кнопка "Играть" под белым кругом -->
     <Button
             android:id="@+id/playButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Играть"
-            android:layout_below="@id/gameTitle"
+            android:textSize="24sp"
+            android:layout_below="@id/gameCharacter"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="20dp"/>
+            android:layout_marginTop="50dp"
+            android:background="@drawable/button_background"/>
 
+    <!-- Счетчик очков (по желанию) -->
     <TextView
             android:id="@+id/scoreTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Score: 0"
+            android:textSize="24sp"
+            android:textColor="#DF2121"
             android:layout_below="@id/playButton"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="20dp"/>
